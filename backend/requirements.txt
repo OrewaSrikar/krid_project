@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+pymongo
+langchain-groq
+langgraph
+python-dotenv
+requests
+twilio
+python-multipart
+langchain-google-genai
+pillow
