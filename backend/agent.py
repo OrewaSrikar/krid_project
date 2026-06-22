@@ -89,7 +89,14 @@ def context_retriever_node(state: GraphState) -> GraphState:
     state["chat_history"] = chat_history
     
     # 4. Save the new incoming message to the DB
-    crud.add_message(db, str(session["_id"]), "user", state["user_message"])
+    crud.add_message(
+        db, 
+        str(session["_id"]), 
+        "user", 
+        text=state.get("user_message"),
+        media_url=state.get("inbound_media_url"),
+        mime_type=state.get("inbound_media_type")
+    )
     
     return state
 
