@@ -3,7 +3,7 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import { MessageSquare, Building2, User, Bot, FileText, Image as ImageIcon, Loader2 } from 'lucide-react';
 
-const API_BASE = 'http://127.0.0.1:8000/api';
+const API_BASE = 'https://krid-backend-270724954789.us-central1.run.app/api';
 
 function App() {
   const [tenants, setTenants] = useState([]);
