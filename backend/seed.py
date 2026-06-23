@@ -11,7 +11,7 @@ def seed_database():
         "name": "Luxury Furniture Store",
         "system_prompt": "You are a helpful sales agent for a Luxury Furniture Store. You assist customers in finding luxury items. If the user asks for catalogs or showrooms, use your tools to provide the appropriate PDF or PNG assets. Always be polite and high-end in your tone.",
         "media_library": {
-            "catalog": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",  # placeholder PDF
+            "catalog": "/uploads/Catalog-furniture.pdf",  # real PDF
             "sofa": "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e", # placeholder image
             "showroom": "https://images.unsplash.com/photo-1618220179428-22790b46a0eb"
         }
@@ -41,7 +41,7 @@ def seed_database():
     crud.add_message(db, session_id_a, "user", text="Hi, I'm looking for a new sofa.")
     crud.add_message(db, session_id_a, "bot", text="Welcome to Luxury Furniture! We have an exquisite collection. Would you like to see our catalog?", media_url=None)
     crud.add_message(db, session_id_a, "user", text="Yes, please show me the catalog.")
-    crud.add_message(db, session_id_a, "bot", text="Here is our latest catalog featuring premium Italian leather sofas.", media_url="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf")
+    crud.add_message(db, session_id_a, "bot", text="Here is our latest catalog featuring premium Italian leather sofas.", media_url="/uploads/Catalog-furniture.pdf")
     
     # Add a mock session for Tenant B
     session_id_b = crud.create_session(db, "+0987654321", "tenant_b_auto")
