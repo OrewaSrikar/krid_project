@@ -1,5 +1,18 @@
 # Multi-Tenant Agentic WhatsApp Orchestrator
 
+This project is a powerful, multi-tenant WhatsApp bot orchestrator built with FastAPI, LangGraph, MongoDB, and a React frontend. It allows you to manage multiple distinct businesses (tenants), each with their own AI system prompt and media library, all sharing a single WhatsApp integration.
+
+## 🚀 Prerequisites
+- **Python 3.9+**
+- **Node.js (v18+)**
+- **MongoDB Atlas** account (or local MongoDB)
+- **Twilio** Account (for WhatsApp Sandbox)
+- API Keys for **Google Gemini** and **Groq**
+
+## 📂 Repository Structure
+- `/backend`: The FastAPI application, LangGraph agent logic, MongoDB integration, and Twilio webhook logic.
+- `/frontend`: The React (Vite + Tailwind) dashboard for managing workspaces (tenants) and monitoring live chats.
+
 ## Phase 1 Instructions: Setting up MongoDB Atlas
 
 I use **MongoDB Atlas**, which is a fully managed cloud database. I use **MongoDB Compass** (a desktop GUI for MongoDB). I already have an account, so I will skip the first step.
@@ -161,3 +174,48 @@ graph TD
     style C2 fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
     style D fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
 ```
+
+## Phase 5: Frontend Dashboard & Workspace Management
+
+To manage multiple clients (tenants) without writing code, we built a modern React dashboard using **Vite**, **Tailwind CSS**, and **Lucide Icons**.
+
+### Key Features:
+1. **Dynamic Workspace Creation**: Easily add new "Tenants" via an interactive UI. You can define the business name, the core AI system prompt, and optionally upload a document (like a PDF catalog) that the agent can send to users.
+2. **Real-time Monitoring**: The dashboard constantly polls the backend to display live WhatsApp conversations for any selected workspace.
+3. **Media Link Resolution**: The dashboard gracefully handles media attachments. Any document uploaded by the workspace admin or sent by the customer is directly viewable in the chat thread.
+
+### Running the Frontend Locally:
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+2. Ensure your backend is running (`uvicorn main:app --reload --port 8000`) so the frontend can pull the live tenant and session data.
+
+## Phase 6: Production Deployment
+
+### 1. Deploying the Backend (Google Cloud Run)
+We use **Google Cloud Run** to host the FastAPI backend because it is serverless and scales automatically.
+
+1. Install the Google Cloud CLI (`gcloud`).
+2. Run the deployment command from the `backend` folder:
+   ```bash
+   gcloud run deploy krid-backend --source . --region us-central1 --allow-unauthenticated
+   ```
+3. **CRITICAL: Environment Variables**: You must manually add your `.env` variables (MongoDB URI, Groq/Google API keys, Twilio credentials) inside the Google Cloud Console under the **Variables & Secrets** tab for your Cloud Run service. The backend will crash without them!
+4. *Note on File Storage*: Because Cloud Run is stateless, any PDFs uploaded via the frontend Dashboard to the `/uploads` folder will only exist temporarily while the server is awake. For a permanent production solution, you should attach an external storage bucket (like Google Cloud Storage).
+
+### 2. Deploying the Frontend (Firebase Hosting)
+The React frontend is hosted on **Firebase Hosting** for lightning-fast global delivery.
+
+1. Ensure `API_BASE` in `App.jsx` points to your live Cloud Run URL (e.g. `https://krid-backend-.../api`).
+2. Build the production files:
+   ```bash
+   npm run build
+   ```
+3. Deploy to Firebase:
+   ```bash
+   firebase deploy --only hosting
+   ```
+4. *Important*: Always remember to run `npm run build` *before* deploying if you make any changes to the code!

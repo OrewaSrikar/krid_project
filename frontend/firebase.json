@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "krid-project",
+    "site": "krid-project-3e091",
     "public": "dist",
     "ignore": [
       "firebase.json",

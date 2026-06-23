@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "krid-project"
-  }
+    "default": "krid-project-3e091",
+    "prod": "krid-project-3e091"
+  },
+  "targets": {},
+  "etags": {}
 }

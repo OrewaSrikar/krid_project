@@ -1,7 +1,12 @@
 import os
 import logging
-from fastapi import FastAPI, Request, Response, BackgroundTasks, Form
+import shutil
+from fastapi import FastAPI, Request, Response, BackgroundTasks, Form, File, UploadFile
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Optional
+import traceback
 from dotenv import load_dotenv
 
 # Load environment variables FIRST
@@ -18,11 +23,18 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Multi-Tenant WhatsApp Orchestrator")
 
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 # Enable CORS for the frontend dashboard
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust in production
-    allow_credentials=True,
+    allow_origins=[
+        "https://krid-project-3e091.web.app",
+        "http://localhost:5173",
+        "*"
+    ],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -100,6 +112,37 @@ def get_tenants():
     db = get_db()
     tenants = list(db.tenants.find({}, {"_id": 1, "name": 1}))
     return [{"id": t["_id"], "name": t["name"]} for t in tenants]
+
+@app.post("/api/tenants")
+def create_tenant_api(
+    name: str = Form(...),
+    system_prompt: str = Form(...),
+    media_keyword: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None)
+):
+    try:
+        db = get_db()
+        media_library = {}
+        
+        if file and file.filename and media_keyword:
+            # Create uploads dir if it doesn't exist
+            os.makedirs("uploads", exist_ok=True)
+            file_location = f"uploads/{file.filename}"
+            with open(file_location, "wb+") as file_object:
+                shutil.copyfileobj(file.file, file_object)
+            media_library[media_keyword] = f"/uploads/{file.filename}"
+            
+        tenant_id = crud.create_tenant(db, name, system_prompt, media_library)
+        return {"status": "ok", "tenant_id": tenant_id}
+    except Exception as e:
+        logger.error(f"Error creating tenant: {str(e)}\n{traceback.format_exc()}")
+        return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
+
+@app.delete("/api/tenants/{tenant_id}")
+def delete_tenant_api(tenant_id: str):
+    db = get_db()
+    crud.delete_tenant(db, tenant_id)
+    return {"status": "ok"}
 
 @app.get("/api/sessions")
 def get_sessions(tenant_id: str = None):
